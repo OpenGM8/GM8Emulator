@@ -4556,23 +4556,19 @@ impl Game {
                 closest
             },
             object_id if object_id <= 100000 => {
-                if let Some(ids) = self.assets.objects.get_asset(object_id).map(|x| x.children.clone()) {
-                    let mut closest = 1000000.0; // GML default
-                    let this = this;
-                    let mut iter = self.room.instance_list.iter_by_identity(ids);
-                    while let Some(other) = iter.next(&self.room.instance_list) {
-                        let sprite = self.get_instance_mask_sprite(other);
-                        let other = self.room.instance_list.get(other);
-                        other.update_bbox(sprite);
-                        let dist = instance_distance(this, other);
-                        if dist < closest {
-                            closest = dist;
-                        }
+                let mut closest = 1000000.0; // GML default
+                let this = this;
+                let mut iter = self.room.instance_list.iter_by_identity(object_id);
+                while let Some(other) = iter.next(&self.room.instance_list) {
+                    let sprite = self.get_instance_mask_sprite(other);
+                    let other = self.room.instance_list.get(other);
+                    other.update_bbox(sprite);
+                    let dist = instance_distance(this, other);
+                    if dist < closest {
+                        closest = dist;
                     }
-                    closest
-                } else {
-                    1000000.0 // GML default
                 }
+                closest
             },
             instance_id => {
                 match self.room.instance_list.get_by_instid(instance_id) {
@@ -4846,12 +4842,8 @@ impl Game {
             },
             _ if obj < 0 => None,
             obj if obj < 100000 => {
-                if let Some(ids) = self.assets.objects.get_asset(obj).map(|x| x.children.clone()) {
-                    let mut iter = self.room.instance_list.iter_by_identity(ids);
-                    (0..n + 1).filter_map(|_| iter.next(&self.room.instance_list)).nth(n as usize)
-                } else {
-                    None
-                }
+                let mut iter = self.room.instance_list.iter_by_identity(obj);
+                (0..n + 1).filter_map(|_| iter.next(&self.room.instance_list)).nth(n as usize)
             },
             inst_id => {
                 if n != 0 {
@@ -4943,27 +4935,23 @@ impl Game {
             },
             obj if obj >= 0 && obj < 100000 => {
                 // Target is an object ID
-                if let Some(object) = self.assets.objects.get_asset(obj) {
-                    let mut iter = self.room.instance_list.iter_by_identity(object.children.clone());
-                    let mut maxdist = Real::from(10000000000.0); // GML default
-                    let mut nearest = None;
-                    loop {
-                        match iter.next(&self.room.instance_list) {
-                            Some(target) => {
-                                let ti = self.room.instance_list.get(target);
-                                let xdist = ti.x.get() - x;
-                                let ydist = ti.y.get() - y;
-                                let dist = (xdist * xdist) + (ydist * ydist);
-                                if dist < maxdist {
-                                    maxdist = dist;
-                                    nearest = Some(target);
-                                }
-                            },
-                            None => break nearest,
-                        }
+                let mut iter = self.room.instance_list.iter_by_identity(obj);
+                let mut maxdist = Real::from(10000000000.0); // GML default
+                let mut nearest = None;
+                loop {
+                    match iter.next(&self.room.instance_list) {
+                        Some(target) => {
+                            let ti = self.room.instance_list.get(target);
+                            let xdist = ti.x.get() - x;
+                            let ydist = ti.y.get() - y;
+                            let dist = (xdist * xdist) + (ydist * ydist);
+                            if dist < maxdist {
+                                maxdist = dist;
+                                nearest = Some(target);
+                            }
+                        },
+                        None => break nearest,
                     }
-                } else {
-                    None
                 }
             },
             // Target is an instance id
@@ -5003,27 +4991,23 @@ impl Game {
             },
             obj if obj >= 0 && obj < 100000 => {
                 // Target is an object ID
-                if let Some(object) = self.assets.objects.get_asset(obj) {
-                    let mut iter = self.room.instance_list.iter_by_identity(object.children.clone());
-                    let mut maxdist = Real::from(0.0);
-                    let mut nearest = None;
-                    loop {
-                        match iter.next(&self.room.instance_list) {
-                            Some(target) => {
-                                let ti = self.room.instance_list.get(target);
-                                let xdist = ti.x.get() - x;
-                                let ydist = ti.y.get() - y;
-                                let dist = (xdist * xdist) + (ydist * ydist);
-                                if nearest.is_none() || dist > maxdist {
-                                    maxdist = dist;
-                                    nearest = Some(target);
-                                }
-                            },
-                            None => break nearest,
-                        }
+                let mut iter = self.room.instance_list.iter_by_identity(obj);
+                let mut maxdist = Real::from(0.0);
+                let mut nearest = None;
+                loop {
+                    match iter.next(&self.room.instance_list) {
+                        Some(target) => {
+                            let ti = self.room.instance_list.get(target);
+                            let xdist = ti.x.get() - x;
+                            let ydist = ti.y.get() - y;
+                            let dist = (xdist * xdist) + (ydist * ydist);
+                            if nearest.is_none() || dist > maxdist {
+                                maxdist = dist;
+                                nearest = Some(target);
+                            }
+                        },
+                        None => break nearest,
                     }
-                } else {
-                    None
                 }
             },
             // Target is an instance ID
@@ -5199,11 +5183,9 @@ impl Game {
                 }
             },
             obj if obj < 100000 => {
-                if let Some(ids) = self.assets.objects.get_asset(obj).map(|x| x.children.clone()) {
-                    let mut iter = self.room.instance_list.iter_by_identity(ids);
-                    while let Some(handle) = iter.next(&self.room.instance_list) {
-                        self.room.instance_list.deactivate(handle);
-                    }
+                let mut iter = self.room.instance_list.iter_by_identity(obj);
+                while let Some(handle) = iter.next(&self.room.instance_list) {
+                    self.room.instance_list.deactivate(handle);
                 }
             },
             inst_id => {
@@ -5261,11 +5243,9 @@ impl Game {
                 }
             },
             obj if obj < 100000 => {
-                if let Some(ids) = self.assets.objects.get_asset(obj).map(|x| x.children.clone()) {
-                    let mut iter = self.room.instance_list.iter_inactive_by_identity(ids);
-                    while let Some(handle) = iter.next(&self.room.instance_list) {
-                        self.room.instance_list.activate(handle);
-                    }
+                let mut iter = self.room.instance_list.iter_inactive_by_identity(obj);
+                while let Some(handle) = iter.next(&self.room.instance_list) {
+                    self.room.instance_list.activate(handle);
                 }
             },
             inst_id => {
